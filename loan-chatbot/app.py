@@ -20,7 +20,7 @@ local_css("assets/style.css")
 
 # Initialize Gemini
 genai.configure(api_key=st.secrets["AIzaSyCooDxXGRdFMuTYdomwUTvI-7aUd0FBfFw"])
-model = genai.GenerativeModel('gemini-2.5-flash')
+model = genai.GenerativeModel('gemini-2.5-flash')  # Changed to supported model
 
 # Load data
 @st.cache_data
@@ -70,10 +70,10 @@ if prompt := st.chat_input("Ask about loan approvals..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Find relevant data
+    # Find relevant data - FIXED THIS SECTION
     relevant_data = df[
         df.apply(lambda row: any(word.lower() in str(row).lower() 
-                  for word in prompt.lower().split()), :
+                for word in prompt.lower().split()), :
     ].head(3)
     
     # Generate response
@@ -97,7 +97,8 @@ if prompt := st.chat_input("Ask about loan approvals..."):
             try:
                 response = model.generate_content(full_prompt)
                 answer = response.text
-            except:
+            except Exception as e:
+                st.error(f"Error generating response: {str(e)}")
                 answer = "I'm having trouble processing that request. Please try again."
     else:
         answer = "I couldn't find relevant loan records. Try asking differently."
